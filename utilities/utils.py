@@ -5,9 +5,25 @@ import streamlit as st
 from streamlit_flow import streamlit_flow
 from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
 from streamlit_flow.state import StreamlitFlowState
+import random
 
 if 'static_flow_state' not in st.session_state:
     st.session_state.static_flow_state = StreamlitFlowState([], [])
+
+def get_thinking_message():
+    """Return a random thinking message from the AI's perspective"""
+    thinking_messages = [
+        "Diving into the digital cosmos for answers... 🧠✨",
+        "Consulting my silicon neurons... processing in progress! 🤖",
+        "Running through billions of possibilities at lightspeed... ⚡",
+        "Hmm, let me connect some neural pathways for this one... 🔄",
+        "Extracting knowledge from the digital realm... please stand by! 🌐",
+        "Ahh, one more query. Let me think about it... 🤔",
+        "Just a moment, I'm sifting through the data... ⏳",
+        "Engaging in a bit of digital soul-searching... 💭"
+        "Let me put on my thinking cap... or should I say, my thinking circuit? 🎩",
+    ]
+    return random.choice(thinking_messages)
 
 def listLlms() ->  dict:
     DownloadModels = lms.list_downloaded_models()
@@ -95,7 +111,7 @@ def getFlow(query, output, intermediate_steps):
             StreamlitFlowNode(
                 id=node_id,
                 pos=(100 + horizontal_spacing, vertical_spacing * (i+1)), 
-                data={'content': f"Tool: {tool_name}\n\nInput: {input_display}\n\nResult: {observation}"}, 
+                data={'content': f"**Tool**: {tool_name}\n\n**Input**: {input_display}\n\n**Result**: {observation}"}, 
                 node_type='default', 
                 source_position='right', 
                 target_position='left', 
@@ -139,7 +155,7 @@ def getFlow(query, output, intermediate_steps):
         StreamlitFlowNode(
             id=response_id,
             pos=(100 + horizontal_spacing * 2, vertical_spacing * ((len(intermediate_steps) // 2) + 1)), 
-            data={'content': f"Final Response: {output}"}, 
+            data={'content': f"**Final Response**: {output}"}, 
             node_type='output', 
             target_position='left', 
             draggable=False,
