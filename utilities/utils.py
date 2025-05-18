@@ -71,9 +71,10 @@ def getFlow(query, output, intermediate_steps):
         'minHeight': '120px' # Minimum height
     }
     
-    # Increase spacing between nodes
-    horizontal_spacing = 400  # Increased from 250
-    vertical_spacing = 250    # Increased from 180
+    horizontal_spacing = 400  
+    vertical_spacing = 250    
+
+    tools_per_column = 2
     
     # Start with query node
     nodes = [
@@ -89,8 +90,9 @@ def getFlow(query, output, intermediate_steps):
     ]
     
     edges = []
+
+    columns = {}
     
-    # Create tool nodes with plain text formatting (no HTML)
     for i, step in enumerate(intermediate_steps):
         action = step[0]  # ToolAgentAction object
         observation = step[1]  # Tool result
@@ -105,12 +107,24 @@ def getFlow(query, output, intermediate_steps):
                 input_display += f"{k}: {v}\n"
         else:
             input_display = f"{str(action.tool_input)}"
+
+        column = i // tools_per_column
         
-        # Create tool node with plain text formatting
+        if column not in columns:
+            columns[column] = []
+        
+        row_index = len(columns[column])
+        y_pos = 100 + vertical_spacing * row_index
+        
+        columns[column].append(y_pos)
+        
+        x_pos = 100 + horizontal_spacing * (column + 1)
+        
+        
         nodes.append(
             StreamlitFlowNode(
                 id=node_id,
-                pos=(100 + horizontal_spacing, vertical_spacing * (i+1)), 
+                pos=(x_pos, y_pos), 
                 data={'content': f"**Tool**: {tool_name}\n\n**Input**: {input_display}\n\n**Result**: {observation}"}, 
                 node_type='default', 
                 source_position='right', 
@@ -120,9 +134,7 @@ def getFlow(query, output, intermediate_steps):
             )
         )
         
-        # Connect nodes with non-animated edges
         if i == 0:
-            # First tool connects to query
             edges.append(
                 StreamlitFlowEdge(
                     id=f'edge_query_{node_id}', 
@@ -149,12 +161,24 @@ def getFlow(query, output, intermediate_steps):
                 )
             )
     
-    # Add final response node
+    if intermediate_steps:
+        last_column = (len(intermediate_steps) - 1) // tools_per_column
+        
+        response_x = 100 + horizontal_spacing * (last_column + 2)
+        
+        if last_column in columns and columns[last_column]:
+            response_y = sum(columns[last_column]) // len(columns[last_column])
+        else:
+            response_y = 100
+    else:
+        response_x = 100 + horizontal_spacing
+        response_y = 100
+
     response_id = 'response'
     nodes.append(
         StreamlitFlowNode(
             id=response_id,
-            pos=(100 + horizontal_spacing * 2, vertical_spacing * ((len(intermediate_steps) // 2) + 1)), 
+            pos=(response_x, response_y), 
             data={'content': f"**Final Response**: {output}"}, 
             node_type='output', 
             target_position='left', 
@@ -163,7 +187,6 @@ def getFlow(query, output, intermediate_steps):
         )
     )
     
-    # Connect last tool to response or query to response if no tools
     if intermediate_steps:
         last_tool_id = f'tool_{len(intermediate_steps)-1}'
         edges.append(
@@ -178,7 +201,6 @@ def getFlow(query, output, intermediate_steps):
             )
         )
     else:
-        # If no tools were used, connect query directly to response
         edges.append(
             StreamlitFlowEdge(
                 id=f'edge_query_{response_id}', 
@@ -202,6 +224,6 @@ def getFlow(query, output, intermediate_steps):
         pan_on_drag=True,
         allow_zoom=True,
         hide_watermark=True,
-        height=700  # Increased height
+        height=700
     )
 # Count the characters in the word "HTML" and store them in a file hello.txt 

@@ -14,8 +14,8 @@ def get_word_length(word: str) -> int:
 @tool
 def python_repl(query: str) -> str:
     """
-    Execute Python code and return the result. 
-    Python code can be used for anything, inlcuding math, string manipulation, file handling, etc.
+    A simple tool to Execute Python code and return the result. 
+    Python code can be used for anything, inlcuding math, string manipulation, file handling, file generation, etc.
     Input should be valid Python code. 
     Returns either the output of the code or an error message. 
     In case code execution is successful but produces no output, a message is returned indicating that. 
