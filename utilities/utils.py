@@ -1,17 +1,46 @@
-import lmstudio as lms
-from lmstudio.sync_api import DownloadedLlm
 import yaml
 import streamlit as st
 from streamlit_flow import streamlit_flow
 from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
 from streamlit_flow.state import StreamlitFlowState
 import random
+from box import ConfigBox
+from box.exceptions import BoxValueError
+from pathlib import Path
 
 if 'static_flow_state' not in st.session_state:
     st.session_state.static_flow_state = StreamlitFlowState([], [])
 
+def read_yaml(path_to_yaml: Path) -> ConfigBox:  # Input Arguments -> Output Argument Type
+    """
+    Reads yaml file and returns
+    Args:
+        path_to_yaml: Path input
+    Raises:
+        ValueError: If file is empty
+        e: empty file
+    Returns:
+        ConfigBox: ConfigBox Type
+    """
+    try:
+        with open(path_to_yaml, 'r', encoding="utf-8") as file:
+            content = ConfigBox(yaml.safe_load(file))
+            return ConfigBox(content)
+    except BoxValueError:
+        raise ValueError(f"Empty file: {path_to_yaml}")
+    except Exception as e:
+        return e
+
 def get_thinking_message():
-    """Return a random thinking message from the AI's perspective"""
+    """
+    Return a random thinking message from the AI's perspective
+    Args:
+        None
+    Raises:
+        None
+    Returns:
+        str: A random thinking message
+    """
     thinking_messages = [
         "Diving into the digital cosmos for answers... 🧠✨",
         "Consulting my silicon neurons... processing in progress! 🤖",
@@ -25,16 +54,19 @@ def get_thinking_message():
     ]
     return random.choice(thinking_messages)
 
-def listLlms() ->  dict:
-    DownloadModels = lms.list_downloaded_models()
-    llms = {}
-    for model in DownloadModels:
-        if isinstance(model, DownloadedLlm):
-            llms[model.model_key] = model
-    return llms
-
 @st.dialog("Model Reasoning Flow", width='large')
 def getFlow(query, output, intermediate_steps):
+    """
+    Visualize the reasoning process of the model using Streamlit Flow and display using st.dialog()
+    Args:
+        query (str): The user's query
+        output (str): The final output from the model
+        intermediate_steps (list): A list of intermediate steps taken by the model
+    Raises:
+        None
+    Returns:
+        None
+    """
     st.markdown("### Agent's Reasoning Process:")
     
     # Define consistent node styles with increased padding
@@ -72,15 +104,15 @@ def getFlow(query, output, intermediate_steps):
     }
     
     horizontal_spacing = 400  
-    vertical_spacing = 250    
-
-    tools_per_column = 2
+    
+    # Use a consistent y position for all nodes
+    base_y_pos = 250
     
     # Start with query node
     nodes = [
         StreamlitFlowNode(
             id='query', 
-            pos=(100, vertical_spacing), 
+            pos=(100, base_y_pos), 
             data={'content': f"**User Query**: {query}"}, 
             node_type='input', 
             source_position='right', 
@@ -88,10 +120,8 @@ def getFlow(query, output, intermediate_steps):
             style=input_style
         )
     ]
-    
-    edges = []
 
-    columns = {}
+    edges = []
     
     for i, step in enumerate(intermediate_steps):
         action = step[0]  # ToolAgentAction object
@@ -100,7 +130,6 @@ def getFlow(query, output, intermediate_steps):
         node_id = f'tool_{i}'
         tool_name = action.tool.replace('_', ' ').title()
         
-        # Format tool input (no HTML tags)
         input_display = ""
         if isinstance(action.tool_input, dict):
             for k, v in action.tool_input.items():
@@ -108,18 +137,11 @@ def getFlow(query, output, intermediate_steps):
         else:
             input_display = f"{str(action.tool_input)}"
 
-        column = i // tools_per_column
+        # Simply place each node to the right of the previous one
+        x_pos = 100 + horizontal_spacing * (i + 1)
         
-        if column not in columns:
-            columns[column] = []
-        
-        row_index = len(columns[column])
-        y_pos = 100 + vertical_spacing * row_index
-        
-        columns[column].append(y_pos)
-        
-        x_pos = 100 + horizontal_spacing * (column + 1)
-        
+        # All nodes have the same y position
+        y_pos = base_y_pos
         
         nodes.append(
             StreamlitFlowNode(
@@ -132,8 +154,9 @@ def getFlow(query, output, intermediate_steps):
                 draggable=False,
                 style=tool_style
             )
-        )
+        )    
         
+        # Connect edges same as before
         if i == 0:
             edges.append(
                 StreamlitFlowEdge(
@@ -147,7 +170,6 @@ def getFlow(query, output, intermediate_steps):
                 )
             )
         else:
-            # Other tools connect to previous tool
             prev_node_id = f'tool_{i-1}'
             edges.append(
                 StreamlitFlowEdge(
@@ -161,18 +183,13 @@ def getFlow(query, output, intermediate_steps):
                 )
             )
     
+    # Position response node at the end of the line
     if intermediate_steps:
-        last_column = (len(intermediate_steps) - 1) // tools_per_column
-        
-        response_x = 100 + horizontal_spacing * (last_column + 2)
-        
-        if last_column in columns and columns[last_column]:
-            response_y = sum(columns[last_column]) // len(columns[last_column])
-        else:
-            response_y = 100
+        response_x = 100 + horizontal_spacing * (len(intermediate_steps) + 1)
     else:
         response_x = 100 + horizontal_spacing
-        response_y = 100
+    
+    response_y = base_y_pos
 
     response_id = 'response'
     nodes.append(
@@ -226,4 +243,3 @@ def getFlow(query, output, intermediate_steps):
         hide_watermark=True,
         height=700
     )
-# Count the characters in the word "HTML" and store them in a file hello.txt 
