@@ -1,11 +1,8 @@
 <p align="center">
-    <img src="./ignore/logo_nobg.png" alt="AgentNexus Logo">
+    <img src="./ignore/logo_whitebg.png" alt="AgentNexus Logo">
 </p>
 
-# AgentNexus: AI Orchestration Playground
-
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/streamlit) ![GitHub License](https://img.shields.io/github/license/Gurneet1928/AgentNexus) ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/Gurneet1928/AgentNexus) 
-
 
 ----
 <p align="center"> 
