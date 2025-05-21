@@ -76,7 +76,7 @@ def providerConfig():
     st.session_state.provider = llmProvider
     try:
         if st.session_state.provider is None:
-            st.error("Please select a LLM provider.")
+            st.markdown("<div style='text-align: center;'>No Provider Selected</div>", unsafe_allow_html=True)
             st.stop()
         elif llmProvider != "LM Studio" and llmProvider != "Ollama":
             if llmProvider == "Azure OpenAI":
@@ -104,7 +104,7 @@ def providerConfig():
                 label="Available LLMs",
                 options=llms.keys(),
                 placeholder="Select an LLM",
-                index=Nones
+                index=None
             )
             if chatModel is not None:
                 ollama.chat(chatModel)
@@ -160,7 +160,7 @@ with st.sidebar:
             )
             model.max_tokens = max_tokens
         else:
-            st.write("Google Gemini models do not support max tokens limit.")
+            st.write("**Note**: Google Gemini models do not support max tokens limit")
         toolList = st.multiselect(
             label="Available Tools",
             options=toolsList.keys(),
@@ -247,4 +247,25 @@ if st.session_state.model_instance is not None:
                 messages.chat_message("assistant").write(f"Ooooppppss!! Looks like we encountered an Error. Here is the error Description to help you: \n{e}")   
                 st.rerun()        
 else:
-    st.error("Model not loaded. Please select a model from the sidebar.")
+    st.html("""
+    <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+        <pre style="font-family: monospace; text-align: center; white-space: pre; line-height: 1.2;">
+    ⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    ⢻⣿⡗⢶⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣄
+    ⠀⢻⣇⠀⠈⠙⠳⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⠶⠛⠋⣹⣿⡿
+    ⠀⠀⠹⣆⠀⠀⠀⠀⠙⢷⣄⣀⣀⣀⣤⣤⣤⣄⣀⣴⠞⠋⠉⠀⠀⠀⢀⣿⡟⠁
+    ⠀⠀⠀⠙⢷⡀⠀⠀⠀⠀⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⡾⠋⠀⠀
+    ⠀⠀⠀⠀⠈⠻⡶⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣠⡾⠋⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⣼⠃⠀⢠⠒⣆⠀⠀⠀⠀⠀⠀⢠⢲⣄⠀⠀⠀⢻⣆⠀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⢰⡏⠀⠀⠈⠛⠋⠀⢀⣀⡀⠀⠀⠘⠛⠃⠀⠀⠀⠈⣿⡀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⣾⡟⠛⢳⠀⠀⠀⠀⠀⣉⣀⠀⠀⠀⠀⣰⢛⠙⣶⠀⢹⣇⠀⠀⠀⠀
+    ⠀⠀⠀⠀⢿⡗⠛⠋⠀⠀⠀⠀⣾⠋⠀⢱⠀⠀⠀⠘⠲⠗⠋⠀⠈⣿⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠘⢷⡀⠀⠀⠀⠀⠀⠈⠓⠒⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⡇⠀⠀⠀
+    ⠀⠀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣧⠀⠀⠀
+    ⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀
+        </pre>
+    </div>
+    <div style="text-align: center; margin-top: 10px; font-weight: bold;">
+        Model not loaded. Please select a model from the sidebar.
+    </div>
+    """)
